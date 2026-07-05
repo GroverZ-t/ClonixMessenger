@@ -45,10 +45,10 @@ jobs:
           echo "Текущая версия Xcode:"
           xcodebuild -version
 
-      - name: Install MAUI workloads
+      - name: Install MAUI workloads (compatible with Xcode 16.2)
         run: |
-          echo "📦 Restoring workloads from project..."
-          dotnet workload restore ./MessengerMaui/MessengerMaui.csproj
+          echo "📦 Installing workload set version 9.0.100 (compatible with Xcode 16.2)..."
+          dotnet workload update --version 9.0.100
           echo "✅ Workloads installed"
           dotnet workload list
 
