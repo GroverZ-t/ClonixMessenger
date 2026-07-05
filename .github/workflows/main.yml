@@ -47,8 +47,13 @@ jobs:
 
       - name: Install MAUI workloads (compatible with Xcode 16.2)
         run: |
-          echo "📦 Installing workload set version 9.0.100 (compatible with Xcode 16.2)..."
+          echo "📦 Installing workload set version 9.0.100..."
           dotnet workload update --version 9.0.100
+          
+          echo "📦 Installing iOS and MAUI workloads..."
+          dotnet workload install ios
+          dotnet workload install maui-ios
+          
           echo "✅ Workloads installed"
           dotnet workload list
 
