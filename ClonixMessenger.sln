@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37314.3 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessengerServer", "MessengerServer\MessengerServer.csproj", "{488DD263-2153-40F1-A04D-55F6946BC174}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessengerMaui", "MessengerMaui\MessengerMaui.csproj", "{0F1AA144-91C0-425F-B22C-285EF363B86E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{488DD263-2153-40F1-A04D-55F6946BC174}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{488DD263-2153-40F1-A04D-55F6946BC174}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{488DD263-2153-40F1-A04D-55F6946BC174}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{488DD263-2153-40F1-A04D-55F6946BC174}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F1AA144-91C0-425F-B22C-285EF363B86E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F1AA144-91C0-425F-B22C-285EF363B86E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F1AA144-91C0-425F-B22C-285EF363B86E}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{0F1AA144-91C0-425F-B22C-285EF363B86E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F1AA144-91C0-425F-B22C-285EF363B86E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {36969C64-F355-4DEF-9EB3-2A39F9310C99}
+	EndGlobalSection
+EndGlobal

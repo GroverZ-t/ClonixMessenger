@@ -1,0 +1,242 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MessengerMaui.MainPage"
+             BackgroundColor="#F5F5F5">
+
+    <Grid>
+
+        <!-- Блок авторизации -->
+        <StackLayout x:Name="AuthLayout" Padding="30" VerticalOptions="Center">
+            <Label Text="Clonix Messenger" 
+                   TextColor="Black"
+                   FontSize="28" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center"
+                   Margin="0,0,0,30"/>
+
+            <Entry x:Name="AuthUsernameEntry" 
+                   Placeholder="Имя пользователя"
+                   BackgroundColor="White"
+                   TextColor="Black"
+                   HeightRequest="45"
+                   Margin="0,0,0,10"/>
+
+            <Entry x:Name="AuthPasswordEntry" 
+                   Placeholder="Пароль"
+                   IsPassword="True"
+                   BackgroundColor="White"
+                   TextColor="Black"
+                   HeightRequest="45"
+                   Margin="0,0,0,20"/>
+
+            <Button Text="Войти" 
+                    Clicked="OnLoginClicked"
+                    BackgroundColor="#007AFF"
+                    TextColor="White"
+                    HeightRequest="45"
+                    Margin="0,0,0,10"/>
+
+            <Button Text="Зарегистрироваться" 
+                    Clicked="OnRegisterClicked"
+                    BackgroundColor="White"
+                    TextColor="#007AFF"
+                    HeightRequest="45"/>
+
+            <Label x:Name="AuthStatusLabel" 
+                   Text=""
+                   TextColor="Red"
+                   HorizontalOptions="Center"
+                   Margin="0,10,0,0"/>
+        </StackLayout>
+
+        <!-- Список чатов -->
+        <Grid x:Name="ChatsListLayout" 
+              RowDefinitions="Auto, *" 
+              Padding="10"
+              IsVisible="False">
+
+            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,10,0,10">
+                <Label Text="Мои чаты" 
+                       FontSize="24" 
+                       FontAttributes="Bold" 
+                       TextColor="Black"
+                       VerticalOptions="Center"/>
+                <Button Grid.Column="1"
+                        Text="+"
+                        FontSize="24"
+                        BackgroundColor="#007AFF"
+                        TextColor="White"
+                        WidthRequest="50"
+                        HeightRequest="50"
+                        CornerRadius="25"
+                        Clicked="OnCreateChatClicked"/>
+            </Grid>
+
+            <CollectionView x:Name="ChatsList" 
+                            Grid.Row="1"
+                            SelectionMode="Single"
+                            SelectionChanged="OnChatSelected">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Padding="15" 
+                               Margin="5"
+                               HasShadow="False"
+                               CornerRadius="10"
+                               BackgroundColor="White">
+                            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">
+                                <!-- Аватарка -->
+                                <Grid Grid.Column="0">
+                                    <Border WidthRequest="50"
+                                            HeightRequest="50"
+                                            StrokeShape="RoundRectangle 25"
+                                            BackgroundColor="#007AFF">
+                                        <Label Text="{Binding Name, Converter={StaticResource FirstLetterConverter}}"
+                                           TextColor="White"
+                                           FontSize="20"
+                                           FontAttributes="Bold"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"/>
+                                    </Border>
+
+                                    <!-- Зелёная точка онлайн -->
+                                    <Ellipse WidthRequest="14"
+                         HeightRequest="14"
+                         Fill="Green"
+                         Stroke="White"
+                         StrokeThickness="2"
+                         HorizontalOptions="End"
+                         VerticalOptions="End"
+                         IsVisible="{Binding IsOnline}"
+                         Margin="0,0,2,2"/>
+                                </Grid>
+
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                    <Label Text="{Binding Name}" 
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="Black"/>
+                                    <Label Text="{Binding LastMessage}" 
+                       FontSize="14"
+                       TextColor="Gray"
+                       LineBreakMode="TailTruncation"
+                       MaxLines="1"/>
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2"
+                   Text="{Binding LastMessageTime, StringFormat='{0:HH:mm}'}"
+                   FontSize="12"
+                   TextColor="Gray"
+                   VerticalOptions="Start"/>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+
+        <!-- Экран переписки -->
+        <Grid x:Name="ChatViewLayout" 
+              RowDefinitions="Auto, *, Auto" 
+              Padding="10"
+              IsVisible="False">
+
+            <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" Margin="0,10,0,5">
+                <Button Text="←"
+                        FontSize="20"
+                        BackgroundColor="Transparent"
+                        TextColor="#007AFF"
+                        WidthRequest="50"
+                        HeightRequest="40"
+                        Clicked="OnBackClicked"/>
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                    <Label x:Name="ChatNameLabel"
+                           FontSize="20" 
+                           FontAttributes="Bold" 
+                           TextColor="Black"
+                           HorizontalOptions="Center"/>
+                    <Label x:Name="OnlineStatusLabel"
+                           FontSize="12"
+                           TextColor="Gray"
+                           HorizontalOptions="Center"/>
+                    <Label x:Name="TypingStatusLabel"
+                           FontSize="12"
+                           TextColor="Gray"
+                           IsVisible="False"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <CollectionView x:Name="MessagesList" 
+                            Grid.Row="1"
+                            Margin="0,10"
+                            Scrolled="OnMessagesScrolled">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="5" ColumnDefinitions="Auto, *" ColumnSpacing="8">
+                            <!-- Аватарка (только для чужих сообщений) -->
+                            <Border Grid.Column="0"
+                                    IsVisible="{Binding IsMine, Converter={StaticResource InverseBoolConverter}}"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    StrokeShape="RoundRectangle 20"
+                                    BackgroundColor="{Binding AvatarColor}"
+                                    VerticalOptions="Start">
+                                <Label Text="{Binding Initial}"
+                                       TextColor="White"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Border>
+
+                            <!-- Сообщение -->
+                            <Frame Grid.Column="1"
+                                   Padding="10" 
+                                   Margin="0,5"
+                                   HasShadow="False"
+                                   CornerRadius="15"
+                                   BackgroundColor="{Binding BubbleColor}"
+                                   HorizontalOptions="{Binding Align}">
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding User}" 
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="{Binding NameColor}"/>
+                                    <Label Text="{Binding Text}" 
+                                           FontSize="16"
+                                           TextColor="Black"/>
+                                    <Label Text="{Binding Timestamp, StringFormat='{0:HH:mm}'}"
+                                           FontSize="10"
+                                           TextColor="Gray"
+                                           HorizontalOptions="End"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Grid Grid.Row="2" 
+                  ColumnDefinitions="*, Auto" 
+                  Padding="5">
+                <Entry x:Name="MessageEntry" 
+                       Placeholder="Введите сообщение..."
+                       BackgroundColor="White"
+                       TextColor="Black"
+                       PlaceholderColor="Gray"
+                       HeightRequest="45"
+                       Margin="0,0,10,0"
+                       TextChanged="OnMessageTextChanged"/>
+                <Button Grid.Column="1"
+                        Text="➤"
+                        FontSize="20"
+                        BackgroundColor="#007AFF"
+                        TextColor="White"
+                        WidthRequest="60"
+                        HeightRequest="45"
+                        Clicked="OnSendClicked"/>
+            </Grid>
+        </Grid>
+
+    </Grid>
+</ContentPage>
