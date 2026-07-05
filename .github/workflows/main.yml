@@ -9,10 +9,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
+
+      - name: Verify .NET version
+        run: |
+          echo "📦 .NET SDK version:"
+          dotnet --version
+          echo ""
+          echo "📋 All installed SDKs:"
+          dotnet --list-sdks
 
       - name: Select Xcode 16.x
         run: |
@@ -37,19 +45,23 @@ jobs:
           echo "Текущая версия Xcode:"
           xcodebuild -version
 
-      - name: Install MAUI workload
-        run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
+      - name: Install MAUI workloads
+        run: |
+          dotnet workload restore ./MessengerMaui/MessengerMaui.csproj
+          echo "✅ Workloads installed"
+          dotnet workload list
 
-      - name: Restore dependencies
-        run: dotnet restore ./MessengerMaui/MessengerMaui.csproj
+      - name: Restore dependencies (iOS only)
+        run: |
+          dotnet restore ./MessengerMaui/MessengerMaui.csproj \
+            -p:TargetFramework=net9.0-ios \
+            -p:RuntimeIdentifier=ios-arm64
 
       - name: Build iOS App Bundle Unsigned
         run: |
           CSPROJ="./MessengerMaui/MessengerMaui.csproj"
           
           echo "Building project: $CSPROJ"
-          echo "Используемый .NET SDK:"
-          dotnet --version
           
           dotnet publish "$CSPROJ" \
             -f net9.0-ios \
@@ -61,7 +73,6 @@ jobs:
             -p:CodesignProvision="" \
             -p:CodesignEntitlements="" \
             -p:TargetFrameworks=net9.0-ios \
-            -p:MauiVersion=9.0.100 \
             -p:EnableCodeSigning=false \
             -p:SkipCodesigning=true \
             -p:ProvisioningProfile=""
