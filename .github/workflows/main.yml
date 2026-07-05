@@ -1,0 +1,101 @@
+name: Build MAUI iOS App Bundle
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: macos-14
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Select Xcode 16.x
+        run: |
+          echo "🔍 Доступные версии Xcode:"
+          ls -d /Applications/Xcode*.app 2>/dev/null || echo "Не найдено"
+          
+          if [ -d "/Applications/Xcode_16.2.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.2.app
+            echo "✅ Выбран Xcode 16.2"
+          elif [ -d "/Applications/Xcode_16.1.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.1.app
+            echo "✅ Выбран Xcode 16.1"
+          elif [ -d "/Applications/Xcode_16.0.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.0.app
+            echo "✅ Выбран Xcode 16.0"
+          else
+            echo "❌ Xcode 16.x не найден!"
+            exit 1
+          fi
+          
+          echo ""
+          echo "Текущая версия Xcode:"
+          xcodebuild -version
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
+
+      - name: Restore dependencies
+        run: dotnet restore ./MessengerMaui/MessengerMaui.csproj
+
+      - name: Build iOS App Bundle Unsigned
+        run: |
+          CSPROJ="./MessengerMaui/MessengerMaui.csproj"
+          
+          echo "Building project: $CSPROJ"
+          echo "Используемый .NET SDK:"
+          dotnet --version
+          
+          dotnet publish "$CSPROJ" \
+            -f net8.0-ios \
+            -c Release \
+            -p:RuntimeIdentifier=ios-arm64 \
+            -p:BuildIpa=false \
+            -p:ArchiveOnBuild=false \
+            -p:CodesignKey="" \
+            -p:CodesignProvision="" \
+            -p:CodesignEntitlements="" \
+            -p:TargetFrameworks=net8.0-ios \
+            -p:MauiVersion=8.0.100 \
+            -p:EnableCodeSigning=false \
+            -p:SkipCodesigning=true \
+            -p:ProvisioningProfile=""
+
+      - name: Find and Zip .app Bundle
+        run: |
+          echo "🔍 Searching for .app bundle..."
+          
+          APP_DIR=$(find . -type d -name "*.app" -path "*/bin/*" 2>/dev/null | head -n 1)
+          
+          if [ -z "$APP_DIR" ]; then
+            echo "❌ ERROR: .app not found. Searching everywhere:"
+            find . -type d -name "*.app" 2>/dev/null
+            exit 1
+          fi
+          
+          echo "✅ Found .app at: $APP_DIR"
+          
+          mkdir -p output
+          cp -R "$APP_DIR" output/MessengerMaui.app
+          
+          echo "Copied. Contents:"
+          ls -la output/MessengerMaui.app/ | head -20
+          
+          cd output
+          zip -r MessengerMaui.ipa MessengerMaui.app
+          cd ..
+          
+          echo "📦 Successfully created output/MessengerMaui.ipa"
+          ls -la output/
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MessengerMaui-iOS-Build
+          path: output/MessengerMaui.ipa
+          retention-days: 7
